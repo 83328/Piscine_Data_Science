@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: piscineds_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ${DATA_PATH}/customer:/Data/customer
+      - ${DATA_PATH}/item/item.csv:/Data/item/item.csv
+    restart: unless-stopped
+    networks:
+      - piscineds_network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: piscineds_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    networks:
+      - piscineds_network
+
+networks:
+  piscineds_network:
+    driver: bridge
+
+volumes:
+  piscineds_data:
+    name: piscineds_data
