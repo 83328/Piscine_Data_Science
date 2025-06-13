@@ -112,30 +112,40 @@ try:
     plt.gca().set_facecolor('gainsboro')  # Only set the axes area to light gray
     plt.show()
 
-    #=== 3. Third Plot: Average basket price per user ===
-    # Use the basket values directly without grouping
-    basket_values = df_baskets['avg_basket'].tolist()
+    #=== 3. Average Basket Price per User with Some Outliers Highlighted ===
 
+    # Compute IQR bounds
+    q1 = df_baskets['avg_basket'].quantile(0.25)
+    q3 = df_baskets['avg_basket'].quantile(0.75)
+    iqr = q3 - q1
+    lower_bound = q1 - 1.5 * iqr
+    upper_bound = q3 + 1.5 * iqr
+
+    # Main (non-outlier) data
+    main_data = df_baskets[(df_baskets['avg_basket'] >= lower_bound) & (df_baskets['avg_basket'] <= upper_bound)]
+
+    # Closest outliers to bounds
+    near_low_outliers = df_baskets[df_baskets['avg_basket'] < lower_bound].nlargest(2, 'avg_basket')
+    near_high_outliers = df_baskets[df_baskets['avg_basket'] > upper_bound].nsmallest(6, 'avg_basket')
+
+    selected_outliers = pd.concat([near_low_outliers, near_high_outliers])
+
+    # Plot main data
     plt.figure()
-    plt.boxplot(basket_values, vert=False, patch_artist=True,
+    plt.boxplot(main_data['avg_basket'], vert=False, patch_artist=True,
                 boxprops=dict(facecolor='cornflowerblue'),
-                showfliers=True,  # Show outliers beyond the whiskers
-                flierprops={'marker': 'o', 'markersize': 3, 'markerfacecolor': 'red'},  # Remove the extra )
-                widths=0.9)  # Add the width parameter here
-    plt.title("Average basket price per user")
+                showfliers=False,
+                widths=0.9)
+
+    # Overlay selected outliers
+    for val in selected_outliers['avg_basket']:
+        plt.plot(val, 1, 'D', color='dimgray', markersize=4)
+
+    plt.title("Average Basket Price per User (Closest Outliers Highlighted)")
     plt.xlabel("price (₳)")
     plt.grid(True, color='white', linestyle='-', linewidth=0.5)
     plt.gca().set_facecolor('gainsboro')
-
-    # Get the actual min/max values
-    q1 = np.percentile(basket_values, 25)
-    q3 = np.percentile(basket_values, 75)
-    iqr = q3 - q1
-    whisker_min = max(0, q1 - 1.5 * iqr)  # Don't go below 0
-    whisker_max = min(80, q3 + 1.5 * iqr)  # Don't go above 80
-
-    plt.xlim(whisker_min, whisker_max)
-    plt.yticks([])  # Remove Y-axis labels/ticks
+    plt.yticks([])
     plt.show()
 
 except Exception as e:
