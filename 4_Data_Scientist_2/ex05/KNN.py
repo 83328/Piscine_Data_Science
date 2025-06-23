@@ -58,10 +58,10 @@ def run_knn_pipeline(main_train_arg, main_test_arg):
     print(f"Predictions saved to {out_path}")
 
     # Report performance (Best F1 and Mean F1 from validation tuning)
+    print(f"----------------------------------------------------------\n")
     print(f"Best F1-Score from Validation Set (K={best_k}): {best_f1_validation:.4f}")
-    print(f"Mean F1-Score across K values (Validation Set): {np.mean(f1_scores_tuning):.4f}")
-    if best_f1_validation >= 0.92: print("Success! F1-Score >= 0.92 (on validation set)")
-    else: print("Warning: F1-Score < 0.92 (on validation set)")
+    print(f"Mean F1-Score across K values (Validation Set): {np.mean(f1_scores_tuning):.4f}\n")
+    print(f"----------------------------------------------------------\n")
 
 if __name__ == "__main__":
     if len(sys.argv) != 3: print("Usage: python KNN.py <main_train_data.csv> <main_test_data.csv>"); sys.exit(1)
